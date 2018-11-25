@@ -18,7 +18,7 @@ model:
     name: vel.rl.models.backbone.nature_cnn
     input_width: 80
     input_height: 60
-    input_channels: 12  # The same as frame_history
+    input_channels: 12  # frame_history times 3 (RGB)
 
 
 reinforcer:
