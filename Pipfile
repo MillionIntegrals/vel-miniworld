@@ -8,6 +8,7 @@ vel = {extras = ["gym", "mongo", "visdom"], version = "*"}
 gym-miniworld = {ref = "master", git = "https://github.com/maximecb/gym-miniworld.git"}
 gym-minigrid = {ref = "master", git = "https://github.com/maximecb/gym-minigrid.git"}
 gym = "*"
+cloudpickle = "*"
 
 [dev-packages]
 

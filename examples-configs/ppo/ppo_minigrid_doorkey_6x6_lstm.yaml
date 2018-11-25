@@ -7,7 +7,6 @@ env:
 
 vec_env:
   name: vel.rl.vecenv.subproc
-#  frame_history: 4  # How many stacked frames go into a single observation
 
 
 model:
@@ -15,9 +14,10 @@ model:
 
   backbone:
     name: vel_miniworld.model.minigrid_obs_lstm
-    hidden_layers: [512, 256]
+    hidden_layers: [256]
     lstm_dim: 128
-    activation: 'elu'
+    activation: 'tanh'
+    normalization: 'layer'
 
 
 reinforcer:
@@ -25,6 +25,7 @@ reinforcer:
 
   algo:
     name: vel.rl.algo.policy_gradient.ppo
+#    normalize_advantage: off
 
     entropy_coefficient: 0.01
     value_coefficient: 0.5

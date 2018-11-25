@@ -1,4 +1,5 @@
 import numpy as np
+import typing
 
 import torch
 import torch.nn as nn
@@ -12,7 +13,8 @@ from vel.api.base import RnnLinearBackboneModel, ModelFactory
 
 class MinigridObsLstm(RnnLinearBackboneModel):
     """ LSTM network properly decoding Minigrid 7x7x3 observations """
-    def __init__(self, input_width=7, input_height=3, hidden_layers=None, lstm_dim=128, activation='relu'):
+    def __init__(self, input_width=7, input_height=3, hidden_layers=None, lstm_dim=128, activation='relu',
+                 normalization: typing.Optional[str]=None):
         super().__init__()
 
         if hidden_layers is None:
@@ -23,6 +25,7 @@ class MinigridObsLstm(RnnLinearBackboneModel):
 
         self.fc_output_dim = self.hidden_layers[-1]
         self.lstm_dim = lstm_dim
+        self.normalization = normalization
 
         self.layer1encode = OneHotEncode(10)
         self.layer2encode = OneHotEncode(6)
@@ -45,6 +48,10 @@ class MinigridObsLstm(RnnLinearBackboneModel):
             activation_layer = net_util.activation(activation)()
 
             hidden_layer_objects.append(linear_layer)
+
+            if self.normalization:
+                hidden_layer_objects.append(net_util.normalization(normalization)(layer_size))
+
             hidden_layer_objects.append(activation_layer)
 
             current_size = layer_size
@@ -97,11 +104,11 @@ class MinigridObsLstm(RnnLinearBackboneModel):
         return hidden_state, new_state
 
 
-def create(input_width=7, input_height=7, hidden_layers=None, lstm_dim=None, activation='relu'):
+def create(input_width=7, input_height=7, hidden_layers=None, lstm_dim=None, activation='relu', normalization=None):
     def instantiate(**_):
         return MinigridObsLstm(
             input_width=input_width, input_height=input_height, hidden_layers=hidden_layers, lstm_dim=lstm_dim,
-            activation=activation
+            normalization=normalization, activation=activation
         )
 
     return ModelFactory.generic(instantiate)
@@ -109,4 +116,3 @@ def create(input_width=7, input_height=7, hidden_layers=None, lstm_dim=None, act
 
 # Add this to make nicer scripting interface
 MinigridObsLstmFactory = create
-

@@ -1,4 +1,5 @@
-name: 'miniworld_ppo_hallway'
+name: 'ppo_miniworld_hallway'
+multiprocessing: 'forkserver'  # Needed for OpenGL to properly initialize
 
 env:
   name: vel_miniworld.env.miniworld
@@ -15,9 +16,9 @@ model:
 
   backbone:
     name: vel.rl.models.backbone.nature_cnn
-    input_width: 7
-    input_height: 7
-    input_channels: 3  # The same as frame_history
+    input_width: 80
+    input_height: 60
+    input_channels: 12  # The same as frame_history
 
 
 reinforcer:
@@ -61,7 +62,7 @@ scheduler:
 commands:
   train:
     name: vel.rl.commands.rl_train_command
-    total_frames: 1.1e7
+    total_frames: 2.0e5
     batches_per_epoch: 10
 
   record:
@@ -69,5 +70,5 @@ commands:
     takes: 10
     videoname: 'miniworld_ppo_hallway_vid_{:04}.avi'
     frame_history: 4
-    sample_args:
-      argmax_sampling: true
+#    sample_args:
+#      argmax_sampling: true

@@ -3,12 +3,52 @@
 import gym_minigrid
 import gym_minigrid.wrappers as w
 import gym
+import math
 
 from gym import Env
 from gym.envs.registration import EnvSpec
 from vel.openai.baselines.bench import Monitor
 from vel.rl.api.base import EnvFactory
 from vel.rl.env.wrappers.clip_episode_length import ClipEpisodeLengthWrapper
+
+
+class StateBonus(gym.Wrapper):
+    """
+    Adds an exploration bonus based on which positions
+    are visited on the grid.
+    """
+
+    def __init__(self, env, scale=0.01):
+        super().__init__(env)
+        self.counts = {}
+        self.scale = scale
+
+    def reset(self, **kwargs):
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+
+        obs, reward, done, info = self.env.step(action)
+
+        # Tuple based on which we index the counts
+        # We use the position after an update
+        env = self.unwrapped
+        tup = tuple(env.agent_pos.tolist())
+
+        # Get the count for this key
+        preCnt = 0
+        if tup in self.counts:
+            preCnt = self.counts[tup]
+
+        # Update the count for this key
+        newCnt = preCnt + 1
+        self.counts[tup] = newCnt
+
+        bonus = 1 / math.sqrt(newCnt)
+
+        reward += bonus * self.scale
+
+        return obs, reward, done, info
 
 
 class MinigridEnvFactory(EnvFactory):
@@ -26,6 +66,9 @@ class MinigridEnvFactory(EnvFactory):
 
         # Flat observation wrapper
         instance = w.ImgObsWrapper(instance)
+
+        # State exploration bonus?
+        # instance = StateBonus(instance)
 
         # Clipp episode length
         instance = ClipEpisodeLengthWrapper(instance, max_episode_length=100)

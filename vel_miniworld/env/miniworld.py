@@ -5,7 +5,10 @@ import gym
 
 from gym import Env
 from gym.envs.registration import EnvSpec
+
+from vel.openai.baselines.bench import Monitor
 from vel.rl.api.base import EnvFactory
+from vel.rl.env.wrappers.clip_episode_length import ClipEpisodeLengthWrapper
 
 
 class MiniworldEnvFactory(EnvFactory):
@@ -20,6 +23,13 @@ class MiniworldEnvFactory(EnvFactory):
         """ Create a new Env instance """
         instance = gym.make(self.envname)
         instance.seed(seed + serial_id)
+
+        # Clip episode length, should be parametrized etc
+        instance = ClipEpisodeLengthWrapper(instance, max_episode_length=1000)
+
+        # Monitor env
+        instance = Monitor(instance, filename=None, allow_early_resets=False)
+
         return instance
 
 
